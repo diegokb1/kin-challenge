@@ -1,5 +1,7 @@
 module PolicyOcr
 
+  POSSIBLE_NUMBERS = [[8], [7], [], [9], [], [6,9], [5,8], [1], [0,9], [3,5,8]]
+
   def self.scan_all_files
     Dir.glob("./spec/fixtures/*.txt") do |text_file|
       scan_files(text_file)
@@ -12,46 +14,25 @@ module PolicyOcr
     file_data = file.readlines.map(&:chomp)
     File.truncate("./spec/fixtures/scan_results/#{exctracted_file_name}-result.txt", 0) if File.exist?("./spec/fixtures/scan_results/#{exctracted_file_name}-result.txt")
 
-    numbers = {
-      entry_number_1_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_2_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_3_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_4_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_5_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_6_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_7_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_8_list: [0,1,2,3,4,5,6,7,8,9],
-      entry_number_9_list: [0,1,2,3,4,5,6,7,8,9],
-    }
+    numbers = {}
+
+    (1..9).each do |num|
+      numbers["entry_number_#{num}_list".to_sym] = [0,1,2,3,4,5,6,7,8,9]
+    end
 
     file_data.each_with_index do |element, index|
-      if (index + 1) % 4 == 0
+      if (index + 1) % 4 == 0# finished reading the input line
         full_entry_number = ""
-        full_entry_number += get_number(numbers[:entry_number_1_list])
-        full_entry_number += get_number(numbers[:entry_number_2_list])
-        full_entry_number += get_number(numbers[:entry_number_3_list])
-        full_entry_number += get_number(numbers[:entry_number_4_list])
-        full_entry_number += get_number(numbers[:entry_number_5_list])
-        full_entry_number += get_number(numbers[:entry_number_6_list])
-        full_entry_number += get_number(numbers[:entry_number_7_list])
-        full_entry_number += get_number(numbers[:entry_number_8_list])
-        full_entry_number += get_number(numbers[:entry_number_9_list])
+        (1..9).each do |num|
+          full_entry_number += get_number(numbers["entry_number_#{num}_list".to_sym])
+        end
         full_entry_number = format_output(full_entry_number)
         full_entry_number += "\n"
-        # puts full_entry_number
         File.open("./spec/fixtures/scan_results/#{exctracted_file_name}-result.txt", "a") { |f| f.write "#{full_entry_number}" }
 
-        numbers = {
-          entry_number_1_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_2_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_3_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_4_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_5_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_6_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_7_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_8_list: [0,1,2,3,4,5,6,7,8,9],
-          entry_number_9_list: [0,1,2,3,4,5,6,7,8,9],
-       }
+        (1..9).each do |num|
+          numbers["entry_number_#{num}_list".to_sym] = [0,1,2,3,4,5,6,7,8,9]
+        end
       end
       
       if (index + 1) % 4 != 0
@@ -205,9 +186,23 @@ module PolicyOcr
       if validate_number(formatted_numbers)
         numbers
       else
+        possible_solutions = []
+        formatted_numbers.each_with_index do |num, index|
+          POSSIBLE_NUMBERS[num].each do |possible_number|
+            formatted_numbers[index] = possible_number
+            if validate_number(formatted_numbers)
+              possible_solutions << formatted_numbers.join('')
+            end
+            formatted_numbers = numbers.split('').map { |num| num.to_i }
+          end
+          if possible_solutions.count == 1
+            return possible_solutions.first
+          elsif possible_solutions.count > 1
+           return "#{numbers} - AMB"
+          end
+        end
         "#{numbers} - ERR"
       end
     end
   end
-  
 end

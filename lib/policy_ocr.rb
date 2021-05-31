@@ -198,8 +198,6 @@ module PolicyOcr
               end
             end
           end
-
-
         end
       end
       # puts element.length
@@ -217,5 +215,14 @@ module PolicyOcr
     end
   end
 
+  def self.validate_number(numbers_list)
+    reversed = numbers_list.reverse
+    total_sum = 0
+    reversed.each_with_index do |element, index|
+      total_sum += element * (index + 1)
+    end
+
+    return total_sum % 11 == 0
+  end
   
 end

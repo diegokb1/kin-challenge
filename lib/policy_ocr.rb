@@ -1,7 +1,16 @@
 module PolicyOcr
   def self.foo
-    file = File.open("./spec/fixtures/sample2.txt")
+    file = File.open("./spec/fixtures/sample.txt")
     file_data = file.readlines.map(&:chomp)
+    entry_number_1_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_2_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_3_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_4_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_5_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_6_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_7_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_8_list = [0,1,2,3,4,5,6,7,8,9]
+    entry_number_9_list = [0,1,2,3,4,5,6,7,8,9]
 
     numbers = {
       entry_number_1_list: [0,1,2,3,4,5,6,7,8,9],
@@ -27,8 +36,10 @@ module PolicyOcr
         full_entry_number += get_number(numbers[:entry_number_7_list])
         full_entry_number += get_number(numbers[:entry_number_8_list])
         full_entry_number += get_number(numbers[:entry_number_9_list])
+        full_entry_number += "\n"
 
-        puts full_entry_number
+        File.open("./spec/fixtures/sample-result.txt", "a") { |f| f.write "#{full_entry_number}" }
+
         numbers = {
           entry_number_1_list: [0,1,2,3,4,5,6,7,8,9],
           entry_number_2_list: [0,1,2,3,4,5,6,7,8,9],

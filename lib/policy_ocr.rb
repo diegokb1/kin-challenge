@@ -1,7 +1,16 @@
 module PolicyOcr
-  def self.scan_files
-    file = File.open("./spec/fixtures/sample.txt")
+
+  def self.scan_all_files
+    Dir.glob("./spec/fixtures/*.txt") do |text_file|
+      scan_files(text_file)
+    end
+  end
+
+  def self.scan_files(file_name)
+    file = File.open(file_name)
+    exctracted_file_name = file_name.split('/').last.split('.txt').first
     file_data = file.readlines.map(&:chomp)
+    File.truncate("./spec/fixtures/scan_results/#{exctracted_file_name}-result.txt", 0) if File.exist?("./spec/fixtures/scan_results/#{exctracted_file_name}-result.txt")
 
     numbers = {
       entry_number_1_list: [0,1,2,3,4,5,6,7,8,9],
@@ -27,10 +36,10 @@ module PolicyOcr
         full_entry_number += get_number(numbers[:entry_number_7_list])
         full_entry_number += get_number(numbers[:entry_number_8_list])
         full_entry_number += get_number(numbers[:entry_number_9_list])
-        # full_entry_number = format_output(full_entry_number)
+        full_entry_number = format_output(full_entry_number)
         full_entry_number += "\n"
-        puts full_entry_number
-        File.open("./spec/fixtures/sample-result.txt", "a") { |f| f.write "#{full_entry_number}" }
+        # puts full_entry_number
+        File.open("./spec/fixtures/scan_results/#{exctracted_file_name}-result.txt", "a") { |f| f.write "#{full_entry_number}" }
 
         numbers = {
           entry_number_1_list: [0,1,2,3,4,5,6,7,8,9],
@@ -169,6 +178,15 @@ module PolicyOcr
     puts "scan completed"
   end
 
+  def self.validate_number(numbers_list)
+    reversed = numbers_list.reverse
+    total_sum = 0
+    reversed.each_with_index do |element, index|
+      total_sum += element * (index + 1)
+    end
+    return total_sum % 11 == 0
+  end
+
   private
   
   def self.get_number(number_list)
@@ -177,16 +195,6 @@ module PolicyOcr
     else
       "?"
     end
-  end
-
-  def self.validate_number(numbers_list)
-    reversed = numbers_list.reverse
-    total_sum = 0
-    reversed.each_with_index do |element, index|
-      total_sum += element * (index + 1)
-    end
-
-    return total_sum % 11 == 0
   end
 
   def self.format_output(numbers)
